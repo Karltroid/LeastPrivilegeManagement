@@ -1,0 +1,8 @@
+me\karltroid\leastprivilegemanagement\LeastPrivilegeManagement.class
+me\karltroid\leastprivilegemanagement\commands\RevealCommand$1.class
+me\karltroid\leastprivilegemanagement\commands\TargetCommand.class
+me\karltroid\leastprivilegemanagement\admins\Admin.class
+me\karltroid\leastprivilegemanagement\commands\RevealCommand.class
+me\karltroid\leastprivilegemanagement\admins\AdminManager.class
+me\karltroid\leastprivilegemanagement\admins\Admin$1.class
+me\karltroid\leastprivilegemanagement\admins\AdminState.class
