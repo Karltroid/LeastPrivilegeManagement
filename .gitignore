@@ -283,12 +283,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-### Ignite Mod Template ###
+/target/
 .idea/
-run/
-target/
-cache/
-
-
-# ignore packaged bedrock resourcepack
-*.mcpack
