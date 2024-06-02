@@ -32,12 +32,6 @@ public class Admin
         {
             List<Admin> onlineAdmins = LeastPrivilegeManagement.getInstance().getAdminManager().getOnlineAdmins();
 
-            if (LeastPrivilegeManagement.getInstance().getAdminManager().isAdmin(target))
-            {
-                adminPlayer.sendMessage(ChatColor.RED + "You can't spectate other admins.");
-                return;
-            }
-
             setAdminState(AdminState.SPECTATING);
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LeastPrivilegeManagement.getInstance(), () -> {
                 adminPlayer.teleport(target); // tp to self so player goes to ground (tick later, doesn't TP otherwise)
@@ -53,7 +47,7 @@ public class Admin
             return;
         }
 
-        if (adminState.equals(AdminState.FREEROAM))
+        if (adminState.equals(AdminState.FREEROAM) || adminState.equals(AdminState.REVEALED))
             setAdminState(AdminState.SPECTATING);
         else
             setAdminState(AdminState.FREEROAM);
@@ -93,9 +87,9 @@ public class Admin
                     break;
                 }
 
-                // reveal the admin player by setting their gamemode to adventure
+                // reveal the admin player by setting their gamemode to survival
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LeastPrivilegeManagement.getInstance(), () -> {
-                    adminPlayer.setGameMode(GameMode.ADVENTURE);
+                    adminPlayer.setGameMode(GameMode.SURVIVAL);
                 },  1L);
 
                 break;

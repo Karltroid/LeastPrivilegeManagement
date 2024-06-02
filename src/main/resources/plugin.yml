@@ -9,7 +9,7 @@ commands:
     permission: leastprivilegemanagement.admin
     aliases: [ admin ]
   reveal:
-    description: Puts admin in spectating mode in adventure mode to show themselves to the target player
+    description: Puts admin in spectating mode in survival mode to show themselves to the target player
     usage: /reveal
     permission: leastprivilegemanagement.admin
     aliases: [ show ]

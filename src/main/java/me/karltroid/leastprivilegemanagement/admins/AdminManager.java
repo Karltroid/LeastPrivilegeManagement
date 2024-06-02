@@ -1,5 +1,6 @@
 package me.karltroid.leastprivilegemanagement.admins;
 
+import me.karltroid.leastprivilegemanagement.LeastPrivilegeManagement;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
@@ -9,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -86,7 +88,7 @@ public class AdminManager implements Listener
         removeAdmin(event.getPlayer());
     }
 
-    @EventHandler
+    /*@EventHandler
     void onAdminModifyingContainer(InventoryClickEvent event)
     {
         if (event.getClickedInventory() == null) return;
@@ -144,7 +146,7 @@ public class AdminManager implements Listener
             if (isAdmin(player) && getOnlineAdmin(player).adminState != AdminState.FREEROAM)
                 event.setCancelled(true);
         }
-    }
+    }*/
 
     @EventHandler
     void onAdminHurt(EntityDamageEvent event)
@@ -155,8 +157,23 @@ public class AdminManager implements Listener
             if (!isAdmin(player)) return;
 
             Admin admin = getOnlineAdmin(player);
-            if (admin.getAdminState() != AdminState.FREEROAM)
-                event.setCancelled(true);
+            if (admin.getAdminState() == AdminState.FREEROAM) return;
+
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LeastPrivilegeManagement.getInstance(), () -> {
+                player.setHealth(20);
+            },  1L);
         }
+    }
+
+    @EventHandler
+    void onAdminHurt(PlayerDeathEvent event)
+    {
+        // admins not in free roam can't be hurt
+        Player player = event.getPlayer();
+        if (!isAdmin(player)) return;
+
+        Admin admin = getOnlineAdmin(player);
+        if (admin.getAdminState() != AdminState.FREEROAM)
+            event.setCancelled(true);
     }
 }
