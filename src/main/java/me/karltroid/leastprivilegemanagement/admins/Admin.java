@@ -26,22 +26,25 @@ public class Admin
       * /target -> toggles on/off spectator
       * /target <player> -> spectator and tps to target
       */
-    public void toggleAdminMode(Player target)
+    public void toggleAdminMode(Player player, Location targetLocation)
     {
-        if (target != null)
+        if (player != null || targetLocation != null)
         {
+            if (player != null) targetLocation = player.getLocation();
+
             List<Admin> onlineAdmins = LeastPrivilegeManagement.getInstance().getAdminManager().getOnlineAdmins();
 
             setAdminState(AdminState.SPECTATING);
+            Location finalTargetLocation = targetLocation;
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(LeastPrivilegeManagement.getInstance(), () -> {
-                adminPlayer.teleport(target); // tp to self so player goes to ground (tick later, doesn't TP otherwise)
+                adminPlayer.teleport(finalTargetLocation); // tp to self so player goes to ground (tick later, doesn't TP otherwise)
             },  2L);
 
             for (Admin admin : onlineAdmins)
             {
                 if (admin.adminPlayer == this.adminPlayer) continue;
 
-                admin.adminPlayer.sendMessage(ChatColor.YELLOW + this.adminPlayer.getName() + " is spectating " + target.getName());
+                admin.adminPlayer.sendMessage(ChatColor.YELLOW + this.adminPlayer.getName() + " is spectating " + (player != null ? player.getName() : "at [" + targetLocation.getBlockX() + ", " + targetLocation.getBlockY() + ", " + targetLocation.getBlockZ() + "]"));
             }
 
             return;

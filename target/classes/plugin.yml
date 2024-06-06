@@ -7,9 +7,9 @@ commands:
     description: Puts admin in spectating mode and optionally teleports to target player
     usage: /target <player>
     permission: leastprivilegemanagement.admin
-    aliases: [ admin ]
+    aliases: [ admin, tp, teleport ]
   reveal:
     description: Puts admin in spectating mode in survival mode to show themselves to the target player
     usage: /reveal
     permission: leastprivilegemanagement.admin
-    aliases: [ show ]
+    aliases: [ show, gms, survival ]
