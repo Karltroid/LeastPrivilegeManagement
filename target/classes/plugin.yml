@@ -13,3 +13,11 @@ commands:
     usage: /reveal
     permission: leastprivilegemanagement.admin
     aliases: [ show, gms, survival ]
+  back:
+    description: Teleports an admin to their previous teleported location
+    usage: /back
+    permission: leastprivilegemanagement.admin
+  forward:
+    description: Teleports an admin back to where they were before their previous /back
+    usage: /forward
+    permission: leastprivilegemanagement.admin

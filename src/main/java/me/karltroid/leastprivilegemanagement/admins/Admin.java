@@ -5,6 +5,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Admin
@@ -13,6 +14,8 @@ public class Admin
     AdminState adminState;
     ItemStack[] savedPriorInventory;
     Location savedPriorLocation;
+    ArrayList<Location> currentLocationHistory = new ArrayList<>();
+    int locationHistoryOffset = 0;
 
 
     public Admin(Player adminPlayer)
@@ -22,15 +25,74 @@ public class Admin
     }
 
 
+    public void teleportBackwardInHistory()
+    {
+        boolean wasPreviouslyAtNewestLocation = locationHistoryOffset == 0;
+        locationHistoryOffset++;
+
+        int locationIndex = currentLocationHistory.size() - locationHistoryOffset - 1;
+        if (locationIndex < 0)
+        {
+            locationHistoryOffset--;
+            adminPlayer.sendMessage(ChatColor.RED + "You have no more previous teleport history.");
+            return;
+        }
+
+        Location teleportLocation = currentLocationHistory.get(locationIndex);
+
+        if (wasPreviouslyAtNewestLocation)
+        {
+            locationHistoryOffset++;
+            currentLocationHistory.add(adminPlayer.getLocation());
+        }
+
+        setAdminState(AdminState.SPECTATING);
+        adminPlayer.teleport(teleportLocation);
+    }
+
+    public void teleportForwardInHistory()
+    {
+        if (locationHistoryOffset == 0)
+        {
+            adminPlayer.sendMessage(ChatColor.RED + "You have no more forward teleport history.");
+            return;
+        }
+
+        locationHistoryOffset--;
+        int locationIndex = currentLocationHistory.size() - locationHistoryOffset - 1;
+        if (locationIndex >= currentLocationHistory.size())
+        {
+            locationHistoryOffset++;
+            adminPlayer.sendMessage(ChatColor.RED + "You have no more previous teleport history.");
+            return;
+        }
+
+        Location teleportLocation = currentLocationHistory.get(locationIndex);
+        setAdminState(AdminState.SPECTATING);
+        adminPlayer.teleport(teleportLocation);
+    }
+
+
     /*
       * /target -> toggles on/off spectator
       * /target <player> -> spectator and tps to target
       */
     public void toggleAdminMode(Player player, Location targetLocation)
     {
+        if (locationHistoryOffset > 0)
+        {
+            for (int i = 0; i < locationHistoryOffset; i++)
+            {
+                currentLocationHistory.remove(currentLocationHistory.size() - 1);
+            }
+
+            locationHistoryOffset = 0;
+        }
+
         if (player != null || targetLocation != null)
         {
             if (player != null) targetLocation = player.getLocation();
+            currentLocationHistory.add(targetLocation);
 
             List<Admin> onlineAdmins = LeastPrivilegeManagement.getInstance().getAdminManager().getOnlineAdmins();
 
@@ -51,7 +113,9 @@ public class Admin
         }
 
         if (adminState.equals(AdminState.FREEROAM) || adminState.equals(AdminState.REVEALED))
+        {
             setAdminState(AdminState.SPECTATING);
+        }
         else
             setAdminState(AdminState.FREEROAM);
     }
@@ -87,6 +151,7 @@ public class Admin
                     if (adminTpLocation.getBlock().getType() == Material.AIR) continue;
 
                     adminPlayer.teleport(adminTpLocation.add(0, 1, 0));
+                    adminLocation.add(adminTpLocation);
                     break;
                 }
 

@@ -1,6 +1,8 @@
 package me.karltroid.leastprivilegemanagement;
 
 import me.karltroid.leastprivilegemanagement.admins.AdminManager;
+import me.karltroid.leastprivilegemanagement.commands.BackCommand;
+import me.karltroid.leastprivilegemanagement.commands.ForwardCommand;
 import me.karltroid.leastprivilegemanagement.commands.RevealCommand;
 import me.karltroid.leastprivilegemanagement.commands.TargetCommand;
 import org.bukkit.event.Listener;
@@ -18,6 +20,8 @@ public final class LeastPrivilegeManagement extends JavaPlugin implements Listen
         getServer().getPluginManager().registerEvents(adminManager, this);
         getInstance().getCommand("target").setExecutor(new TargetCommand());
         getInstance().getCommand("reveal").setExecutor(new RevealCommand());
+        getInstance().getCommand("back").setExecutor(new BackCommand());
+        getInstance().getCommand("forward").setExecutor(new ForwardCommand());
     }
 
     @Override
