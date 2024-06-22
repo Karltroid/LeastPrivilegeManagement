@@ -27,27 +27,20 @@ public class Admin
 
     public void teleportBackwardInHistory()
     {
-        boolean wasPreviouslyAtNewestLocation = locationHistoryOffset == 0;
-        locationHistoryOffset++;
+        boolean startingFromFreeRoam = adminState == AdminState.FREEROAM;
+        if (!startingFromFreeRoam) locationHistoryOffset++;
+        else locationHistoryOffset = 0;
 
         int locationIndex = currentLocationHistory.size() - locationHistoryOffset - 1;
         if (locationIndex < 0)
         {
-            locationHistoryOffset--;
+            if (!startingFromFreeRoam) locationHistoryOffset--;
             adminPlayer.sendMessage(ChatColor.RED + "You have no more previous teleport history.");
             return;
         }
 
-        Location teleportLocation = currentLocationHistory.get(locationIndex);
-
-        if (wasPreviouslyAtNewestLocation)
-        {
-            locationHistoryOffset++;
-            currentLocationHistory.add(adminPlayer.getLocation());
-        }
-
         setAdminState(AdminState.SPECTATING);
-        adminPlayer.teleport(teleportLocation);
+        adminPlayer.teleport(currentLocationHistory.get(locationIndex));
     }
 
     public void teleportForwardInHistory()
@@ -79,6 +72,8 @@ public class Admin
       */
     public void toggleAdminMode(Player player, Location targetLocation)
     {
+        // if somewhere in the middle of your history and teleporting somewhere, clear everything from the current point onward
+        // the new location is your new beginning (0 offset)
         if (locationHistoryOffset > 0)
         {
             for (int i = 0; i < locationHistoryOffset; i++)
@@ -89,10 +84,17 @@ public class Admin
             locationHistoryOffset = 0;
         }
 
+        if (adminState == AdminState.FREEROAM)
+        {
+            currentLocationHistory.add(adminPlayer.getLocation());
+            locationHistoryOffset = 0;
+        }
+
         if (player != null || targetLocation != null)
         {
             if (player != null) targetLocation = player.getLocation();
             currentLocationHistory.add(targetLocation);
+            locationHistoryOffset = 0;
 
             List<Admin> onlineAdmins = LeastPrivilegeManagement.getInstance().getAdminManager().getOnlineAdmins();
 
@@ -113,9 +115,7 @@ public class Admin
         }
 
         if (adminState.equals(AdminState.FREEROAM) || adminState.equals(AdminState.REVEALED))
-        {
             setAdminState(AdminState.SPECTATING);
-        }
         else
             setAdminState(AdminState.FREEROAM);
     }
