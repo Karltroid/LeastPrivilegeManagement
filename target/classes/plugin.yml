@@ -7,12 +7,12 @@ commands:
     description: Puts admin in spectating mode and optionally teleports to target player
     usage: /target <player>
     permission: leastprivilegemanagement.admin
-    aliases: [ admin, tp, teleport ]
+    aliases: [ admin, tp, teleport, spec, spectate, gmsp ]
   reveal:
     description: Puts admin in spectating mode in survival mode to show themselves to the target player
     usage: /reveal
     permission: leastprivilegemanagement.admin
-    aliases: [ show, gms, survival ]
+    aliases: [ show, gms, survival, gm0 ]
   back:
     description: Teleports an admin to their previous teleported location
     usage: /back

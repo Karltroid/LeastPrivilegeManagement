@@ -70,7 +70,7 @@ public class Admin
       * /target -> toggles on/off spectator
       * /target <player> -> spectator and tps to target
       */
-    public void toggleAdminMode(Player player, Location targetLocation)
+    public void toggleAdminMode(OfflinePlayer player, Location targetLocation)
     {
         // if somewhere in the middle of your history and teleporting somewhere, clear everything from the current point onward
         // the new location is your new beginning (0 offset)
@@ -92,7 +92,14 @@ public class Admin
 
         if (player != null || targetLocation != null)
         {
-            if (player != null) targetLocation = player.getLocation();
+
+            if (player != null) {
+                if (!player.hasPlayedBefore()) {
+                    this.adminPlayer.sendMessage(ChatColor.RED + "This player has never joined before.");
+                    return;
+                }
+                targetLocation = player.getLocation();
+            }
             currentLocationHistory.add(targetLocation);
             locationHistoryOffset = 0;
 
@@ -108,7 +115,7 @@ public class Admin
             {
                 if (admin.adminPlayer == this.adminPlayer) continue;
 
-                admin.adminPlayer.sendMessage(ChatColor.YELLOW + this.adminPlayer.getName() + " is spectating " + (player != null ? player.getName() : "at [" + targetLocation.getBlockX() + ", " + targetLocation.getBlockY() + ", " + targetLocation.getBlockZ() + "]"));
+                admin.adminPlayer.sendMessage(ChatColor.GOLD + this.adminPlayer.getName() + " is spectating " + (player != null ? player.getName() + (!player.isOnline() ? " (offline player)" : "") : "at [" + targetLocation.getBlockX() + ", " + targetLocation.getBlockY() + ", " + targetLocation.getBlockZ() + (targetLocation.getWorld().getName().equals("world_nether") ? " (nether)]" : "]")));
             }
 
             return;
