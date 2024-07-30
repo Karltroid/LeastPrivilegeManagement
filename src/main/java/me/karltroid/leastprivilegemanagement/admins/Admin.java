@@ -94,11 +94,11 @@ public class Admin
         {
 
             if (player != null) {
-                if (!player.hasPlayedBefore()) {
+                targetLocation = player.getLocation();
+                if (targetLocation == null) {
                     this.adminPlayer.sendMessage(ChatColor.RED + "This player has never joined before.");
                     return;
                 }
-                targetLocation = player.getLocation();
             }
             currentLocationHistory.add(targetLocation);
             locationHistoryOffset = 0;
