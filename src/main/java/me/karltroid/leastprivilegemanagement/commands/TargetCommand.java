@@ -49,9 +49,13 @@ public class TargetCommand implements CommandExecutor
                 player.sendMessage(ChatColor.RED + "Unknown world name.");
             }
         }
-        else
+        else if (args.length > 4)
         {
             player.sendMessage(ChatColor.RED + "Usage: /admin <player> or /admin <x> <y> <z> <world_name(optional)>");
+        }
+        else
+        {
+            admin.toggleAdminMode(null, null);
         }
 
 
