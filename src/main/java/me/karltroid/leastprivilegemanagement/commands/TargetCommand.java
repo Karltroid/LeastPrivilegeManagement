@@ -58,8 +58,6 @@ public class TargetCommand implements CommandExecutor
             admin.toggleAdminMode(null, null);
         }
 
-
-
         return true;
     }
 }

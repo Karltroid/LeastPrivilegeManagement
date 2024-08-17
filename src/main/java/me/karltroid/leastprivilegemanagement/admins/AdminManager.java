@@ -66,7 +66,7 @@ public class AdminManager implements Listener
         return onlineAdmins.get(uuid);
     }
 
-    public List<Admin> getOnlineAdmins()
+    public static List<Admin> getOnlineAdmins()
     {
         return onlineAdmins.values().stream().toList();
     }

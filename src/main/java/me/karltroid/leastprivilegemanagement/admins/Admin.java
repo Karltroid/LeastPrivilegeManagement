@@ -103,7 +103,7 @@ public class Admin
             currentLocationHistory.add(targetLocation);
             locationHistoryOffset = 0;
 
-            List<Admin> onlineAdmins = LeastPrivilegeManagement.getInstance().getAdminManager().getOnlineAdmins();
+            List<Admin> onlineAdmins = AdminManager.getOnlineAdmins();
 
             setAdminState(AdminState.SPECTATING);
             Location finalTargetLocation = targetLocation;
@@ -195,5 +195,9 @@ public class Admin
 
         if (savedPriorInventory != null) adminPlayer.getInventory().setContents(savedPriorInventory);
         savedPriorInventory = null;
+    }
+
+    public Player getPlayer() {
+        return adminPlayer;
     }
 }

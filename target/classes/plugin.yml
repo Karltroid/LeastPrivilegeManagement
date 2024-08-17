@@ -21,3 +21,12 @@ commands:
     description: Teleports an admin back to where they were before their previous /back
     usage: /forward
     permission: leastprivilegemanagement.admin
+  freeze:
+    description: Stops a given player from moving.
+    usage: /freeze <player>
+    permission: leastprivilegemanagement.admin
+  release:
+    description: Allows a frozen player to move once again.
+    usage: /release <player>
+    permission: leastprivilegemanagement.admin
+    aliases: [ unfreeze ]
