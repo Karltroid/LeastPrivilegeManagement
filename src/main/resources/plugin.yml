@@ -30,3 +30,8 @@ commands:
     usage: /release <player>
     permission: leastprivilegemanagement.admin
     aliases: [ unfreeze ]
+  yell:
+    description: Puts big red message on players screen.
+    usage: /yell <player> <message>
+    permission: leastprivilegemanagement.admin
+    aliases: [ y ]

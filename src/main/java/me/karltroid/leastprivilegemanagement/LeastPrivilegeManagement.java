@@ -25,6 +25,7 @@ public final class LeastPrivilegeManagement extends JavaPlugin implements Listen
         getInstance().getCommand("forward").setExecutor(new ForwardCommand());
         getInstance().getCommand("freeze").setExecutor(new FreezeCommand());
         getInstance().getCommand("release").setExecutor(new ReleaseCommand());
+        getInstance().getCommand("yell").setExecutor(new YellCommand());
     }
 
     @Override
