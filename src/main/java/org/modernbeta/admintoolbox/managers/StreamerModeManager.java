@@ -1,5 +1,17 @@
 package org.modernbeta.admintoolbox.managers;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.Nullable;
+
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.modernbeta.admintoolbox.AdminToolboxPlugin;
+import org.modernbeta.admintoolbox.integration.luckperms.LuckPermsIntegration;
+import org.modernbeta.admintoolbox.integration.placeholderapi.expansion.StreamerModePlaceholderCache;
+
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
@@ -7,15 +19,6 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.platform.PlayerAdapter;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.modernbeta.admintoolbox.AdminToolboxPlugin;
-import org.modernbeta.admintoolbox.integration.luckperms.LuckPermsIntegration;
-
-import javax.annotation.Nullable;
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class StreamerModeManager {
 	public static final String STREAMER_MODE_USE_PERMISSION = "admintoolbox.streamermode";
@@ -24,10 +27,15 @@ public class StreamerModeManager {
 
 	private final AdminToolboxPlugin plugin;
 	private final LuckPermsIntegration luckPerms;
+	private @Nullable StreamerModePlaceholderCache placeholderCache;
 
 	public StreamerModeManager(AdminToolboxPlugin plugin, LuckPermsIntegration luckPerms) {
 		this.plugin = plugin;
 		this.luckPerms = luckPerms;
+	}
+
+	public void setPlaceholderCache(@Nullable StreamerModePlaceholderCache placeholderCache) {
+		this.placeholderCache = placeholderCache;
 	}
 
 	public record StreamerModeState(
@@ -66,11 +74,17 @@ public class StreamerModeManager {
 		}
 
 		return userManager.saveUser(user)
-			.thenApply((_void) -> new StreamerModeState(
-				player,
-				true,
-				duration
-			));
+			.thenApply((_void) -> {
+				StreamerModePlaceholderCache cache = this.placeholderCache;
+				if (cache != null) {
+					cache.updateStreamerModeActive(player.getUniqueId(), true);
+				}
+				return new StreamerModeState(
+					player,
+					true,
+					duration
+				);
+			});
 	}
 
 	public CompletableFuture<StreamerModeState> disable(Player player) {
@@ -87,11 +101,17 @@ public class StreamerModeManager {
 		));
 
 		return userManager.saveUser(user)
-			.thenApply((_void) -> new StreamerModeState(
-				player,
-				false,
-				null
-			));
+			.thenApply((_void) -> {
+				StreamerModePlaceholderCache cache = this.placeholderCache;
+				if (cache != null) {
+					cache.updateStreamerModeActive(player.getUniqueId(), false);
+				}
+				return new StreamerModeState(
+					player,
+					false,
+					null
+				);
+			});
 	}
 
 	public boolean isActive(Player player) {

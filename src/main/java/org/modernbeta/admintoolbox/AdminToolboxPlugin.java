@@ -1,6 +1,13 @@
 package org.modernbeta.admintoolbox;
 
-import net.luckperms.api.LuckPerms;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
@@ -9,20 +16,29 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.modernbeta.admintoolbox.commands.*;
+import org.modernbeta.admintoolbox.commands.FreezeCommand;
+import org.modernbeta.admintoolbox.commands.FullbrightCommand;
+import org.modernbeta.admintoolbox.commands.GoBackCommand;
+import org.modernbeta.admintoolbox.commands.GoForwardCommand;
+import org.modernbeta.admintoolbox.commands.PluginManageCommand;
+import org.modernbeta.admintoolbox.commands.RevealCommand;
+import org.modernbeta.admintoolbox.commands.SpawnCommand;
+import org.modernbeta.admintoolbox.commands.StreamerModeCommand;
+import org.modernbeta.admintoolbox.commands.TargetCommand;
+import org.modernbeta.admintoolbox.commands.UnavailableCommand;
+import org.modernbeta.admintoolbox.commands.UnfreezeCommand;
+import org.modernbeta.admintoolbox.commands.YellCommand;
 import org.modernbeta.admintoolbox.integration.BlueMapIntegration;
 import org.modernbeta.admintoolbox.integration.luckperms.LuckPermsIntegration;
 import org.modernbeta.admintoolbox.integration.placeholderapi.PlaceholderAPIIntegration;
+import org.modernbeta.admintoolbox.integration.placeholderapi.expansion.StreamerModePlaceholderCache;
+import org.modernbeta.admintoolbox.integration.placeholderapi.expansion.StreamerModePlaceholderCacheListener;
+import org.modernbeta.admintoolbox.integration.placeholderapi.expansion.StreamerModePlaceholderLuckPermsListener;
 import org.modernbeta.admintoolbox.managers.FreezeManager;
 import org.modernbeta.admintoolbox.managers.StreamerModeManager;
 import org.modernbeta.admintoolbox.managers.admin.AdminManager;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import net.luckperms.api.LuckPerms;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AdminToolboxPlugin extends JavaPlugin {
@@ -42,6 +58,7 @@ public class AdminToolboxPlugin extends JavaPlugin {
 	private @Nullable BlueMapIntegration blueMapIntegration = null;
 	private @Nullable LuckPermsIntegration luckPermsIntegration = null;
 	private @Nullable PlaceholderAPIIntegration placeholderAPIIntegration = null;
+	private @Nullable StreamerModePlaceholderCache streamerModePlaceholderCache = null;
 
 	private static final String ADMIN_STATE_CONFIG_FILENAME = "admin-state.yml";
 
@@ -91,6 +108,21 @@ public class AdminToolboxPlugin extends JavaPlugin {
 
 				this.streamerModeManager = new StreamerModeManager(this, luckPermsIntegration);
 				getCommand("streamermode").setExecutor(new StreamerModeCommand(streamerModeManager));
+
+				// Create placeholder cache and wire into StreamerModeManager
+				this.streamerModePlaceholderCache = new StreamerModePlaceholderCache();
+				this.streamerModeManager.setPlaceholderCache(streamerModePlaceholderCache);
+
+				// Register Bukkit event listener for join/quit cache management
+				StreamerModePlaceholderCacheListener cacheListener =
+					new StreamerModePlaceholderCacheListener(streamerModePlaceholderCache, this);
+				getServer().getPluginManager().registerEvents(cacheListener, this);
+
+				// Register LuckPerms event listener for permission/meta change cache refresh
+				StreamerModePlaceholderLuckPermsListener luckPermsListener =
+					new StreamerModePlaceholderLuckPermsListener(
+						streamerModePlaceholderCache, this, luckPermsIntegration, streamerModeManager);
+				luckPermsListener.register();
 			}
 		} catch (NoClassDefFoundError e) {
 			getLogger().warning("LuckPerms not found! Some features will be unavailable.");
@@ -107,7 +139,10 @@ public class AdminToolboxPlugin extends JavaPlugin {
 		}
 
 		try {
-			this.placeholderAPIIntegration = new PlaceholderAPIIntegration(this);
+			if (this.streamerModePlaceholderCache == null) {
+				this.streamerModePlaceholderCache = new StreamerModePlaceholderCache();
+			}
+			this.placeholderAPIIntegration = new PlaceholderAPIIntegration(this, streamerModePlaceholderCache);
 			this.placeholderAPIIntegration.registerPlaceholders();
 		} catch (NoClassDefFoundError e) {
 			getLogger().warning("PlaceholderAPI is not available! Some features will be unavailable.");
@@ -182,6 +217,10 @@ public class AdminToolboxPlugin extends JavaPlugin {
 
 	public Optional<BlueMapIntegration> getBlueMap() {
 		return Optional.ofNullable(blueMapIntegration);
+	}
+
+	public Optional<StreamerModePlaceholderCache> getStreamerModePlaceholderCache() {
+		return Optional.ofNullable(streamerModePlaceholderCache);
 	}
 
 	@Override

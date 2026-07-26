@@ -1,24 +1,20 @@
 package org.modernbeta.admintoolbox.integration.placeholderapi.expansion;
 
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.clip.placeholderapi.expansion.Relational;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.modernbeta.admintoolbox.AdminToolboxPlugin;
-import org.modernbeta.admintoolbox.managers.StreamerModeManager;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import me.clip.placeholderapi.expansion.Relational;
 
 public class StreamerModePlaceholder extends PlaceholderExpansion implements Relational {
 	private final AdminToolboxPlugin plugin;
+	private final StreamerModePlaceholderCache cache;
 
-	private static final String SM_VIEW_PERMISSION = "admintoolbox.streamermode.placeholder.view";
-	private static final String SM_WEAR_PERMISSION = "admintoolbox.streamermode.placeholder.wear";
-
-	public StreamerModePlaceholder(AdminToolboxPlugin plugin) {
+	public StreamerModePlaceholder(AdminToolboxPlugin plugin, StreamerModePlaceholderCache cache) {
 		this.plugin = plugin;
+		this.cache = cache;
 	}
 
 	@Override
@@ -47,21 +43,14 @@ public class StreamerModePlaceholder extends PlaceholderExpansion implements Rel
 	public String onPlaceholderRequest(Player viewer, Player wearer, String identifier) {
 		if (viewer == null || wearer == null) return "";
 
-		Optional<StreamerModeManager> streamerModeManager = plugin.getStreamerModeManager();
-
 		// hide placeholder from players currently in streamer mode
 		if (!plugin.getConfig().getBoolean("streamermode.show-indicators-when-active", false)
-			&& streamerModeManager.map(sm ->
-				sm.isActive(viewer))
-			.orElse(false)) return "";
+			&& cache.isStreamerModeActive(viewer.getUniqueId())) return "";
 
-		if (!viewer.hasPermission(SM_VIEW_PERMISSION)) return "";
-		if (!wearer.hasPermission(SM_WEAR_PERMISSION)) return "";
+		if (!cache.hasViewPermission(viewer.getUniqueId())) return "";
+		if (!cache.hasWearPermission(wearer.getUniqueId())) return "";
 
-		boolean isActive = streamerModeManager.map(sm ->
-				sm.isActive(wearer))
-			.orElse(false);
-		if (!isActive) return "";
+		if (!cache.isStreamerModeActive(wearer.getUniqueId())) return "";
 
 		String tag = ChatColor.RED + "⬤";
 		return switch (identifier.toLowerCase()) {
